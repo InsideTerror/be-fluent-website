@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Be Fluent — Online angol beszédfejlesztés haladóknak</title>
+<meta name="description" content="100%-ban online, beszédközpontú angolórák haladóknak, akik értik a nyelvet, mégsem beszélnek magabiztosan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,440;0,9..144,560;1,9..144,440;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF6EE;
+    --paper-deep:#F1EADA;
+    --ink:#251F19;
+    --ink-soft:#5A5147;
+    --forest:#33422C;
+    --forest-dark:#1E2919;
+    --forest-line: rgba(37,31,25,0.14);
+    --forest-line-dark: rgba(250,246,238,0.18);
+    --amber:#B9832E;
+    --amber-deep:#8E5F1E;
+    --amber-tint:#EAD9B4;
+    --cream-text: #F3EEE1;
+    --radius-soft: 2px;
+    --measure: 62ch;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%; display:block;}
+  a{color:inherit;}
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:560;
+    line-height:1.12;
+    margin:0 0 0.5em;
+    letter-spacing:-0.01em;
+  }
+  p{margin:0 0 1em;}
+  .container{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+  .measure{max-width:var(--measure);}
+  section{padding:96px 0;}
+  @media (max-width:720px){
+    section{padding:64px 0;}
+    .container{padding:0 22px;}
+    body{font-size:16px;}
+  }
+
+  /* ---------- Waveform signature ---------- */
+  .wave{
+    display:flex;
+    align-items:flex-end;
+    gap:4px;
+    height:22px;
+  }
+  .wave span{
+    display:block;
+    width:3px;
+    background:var(--amber);
+    border-radius:2px;
+  }
+  .wave.on-dark span{ background:var(--amber-tint); }
+
+  .rule-wave{
+    width:100%;
+    height:34px;
+    margin: 0 0 40px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(250,246,238,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom:1px solid var(--forest-line);
+  }
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px 0;
+  }
+  .wordmark{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:1.5rem;
+    text-decoration:none;
+    color:var(--forest);
+  }
+  .nav-links{
+    display:flex;
+    gap:32px;
+    list-style:none;
+    margin:0; padding:0;
+  }
+  .nav-links a{
+    text-decoration:none;
+    font-size:0.95rem;
+    color:var(--ink-soft);
+    transition:color .15s ease;
+  }
+  .nav-links a:hover{color:var(--forest);}
+  .nav-right{display:flex; align-items:center; gap:28px;}
+  .nav-toggle{display:none;}
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:13px 26px;
+    background:var(--forest);
+    color:var(--cream-text);
+    text-decoration:none;
+    border-radius:var(--radius-soft);
+    font-size:0.96rem;
+    font-weight:500;
+    border:1px solid var(--forest);
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease, transform .1s ease;
+  }
+  .btn:hover{ background:var(--forest-dark); }
+  .btn:active{ transform:translateY(1px); }
+  .btn-ghost{
+    background:transparent;
+    color:var(--forest);
+    border:1px solid var(--forest);
+  }
+  .btn-ghost:hover{ background:var(--forest); color:var(--cream-text); }
+  .btn-amber{
+    background:var(--amber);
+    border-color:var(--amber);
+    color:#241a08;
+  }
+  .btn-amber:hover{ background:var(--amber-deep); border-color:var(--amber-deep); color:var(--cream-text);}
+  .btn-on-dark{ border-color:var(--cream-text); color:var(--cream-text); background:transparent; }
+  .btn-on-dark:hover{ background:var(--cream-text); color:var(--forest-dark); }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:72px 0 100px;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap:64px;
+    align-items:center;
+  }
+  .hero h1{
+    font-size:clamp(2.3rem, 4vw, 3.35rem);
+    color:var(--forest-dark);
+    max-width:14ch;
+  }
+  .hero .lede{
+    font-size:1.18rem;
+    color:var(--ink-soft);
+    max-width:44ch;
+    margin-bottom:1.6em;
+  }
+  .hero .cta-row{
+    display:flex;
+    gap:18px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .hero-photo-wrap{
+    position:relative;
+  }
+  .hero-photo{
+    clip-path: polygon(4% 0%, 100% 2%, 97% 100%, 0% 97%);
+    overflow:hidden;
+    background:var(--forest);
+  }
+  .hero-photo img{ width:100%; height:100%; object-fit:cover; }
+  .hero-wave-badge{
+    position:absolute;
+    left:-26px; bottom:-26px;
+    background:var(--forest-dark);
+    padding:18px 20px;
+    border-radius:var(--radius-soft);
+  }
+  @media (max-width:900px){
+    .hero-grid{ grid-template-columns:1fr; gap:44px;}
+    .hero{ padding:44px 0 72px; }
+    .hero-photo-wrap{ order:-1; }
+    .hero-wave-badge{ left:14px; bottom:-20px; }
+  }
+
+  /* ---------- Section headings ---------- */
+  .section-head{
+    max-width:58ch;
+    margin-bottom:48px;
+  }
+  .section-head h2{
+    font-size:clamp(1.7rem, 2.6vw, 2.25rem);
+    color:var(--forest-dark);
+  }
+  .section-head .lede{
+    color:var(--ink-soft);
+    font-size:1.06rem;
+  }
+  section.on-dark .section-head h2{ color:var(--cream-text); }
+  section.on-dark .section-head .lede{ color:#CBD3C4; }
+
+  /* ---------- Recognition / pain points ---------- */
+  .recognize{
+    display:grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    gap:64px;
+  }
+  .recognize-list{
+    list-style:none;
+    margin:0; padding:0;
+    border-top:1px solid var(--forest-line);
+  }
+  .recognize-list li{
+    padding:16px 0;
+    border-bottom:1px solid var(--forest-line);
+    font-size:1.04rem;
+    color:var(--ink);
+  }
+  .reframe{
+    align-self:start;
+    padding-top:6px;
+  }
+  .reframe p{ font-size:1.12rem; }
+  .reframe strong{ color:var(--forest-dark); font-weight:600; }
+  @media (max-width:840px){
+    .recognize{ grid-template-columns:1fr; gap:32px; }
+  }
+
+  /* ---------- About ---------- */
+  .about{
+    background:var(--forest-dark);
+    color:var(--cream-text);
+  }
+  .about-grid{
+    display:grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap:64px;
+    align-items:start;
+  }
+  .about-photo{
+    position:relative;
+    aspect-ratio: 4/5;
+    overflow:hidden;
+    border-radius:var(--radius-soft);
+  }
+  .about-photo img{
+    width:100%; height:100%;
+    object-fit:cover;
+    object-position: 50% 18%;
+  }
+  .about h2{
+    color:var(--cream-text);
+    font-size:clamp(1.8rem, 3vw, 2.4rem);
+  }
+  .about .role{
+    color:var(--amber-tint);
+    font-size:1rem;
+    margin-bottom:1.4em;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+  }
+  .about p{ color:#DCE2D5; max-width:58ch; }
+  @media (max-width:840px){
+    .about-grid{ grid-template-columns:1fr; gap:32px; }
+    .about-photo{ max-width:340px; }
+  }
+
+  /* ---------- How we work ---------- */
+  .method-list{
+    list-style:none;
+    margin:0; padding:0;
+    display:grid;
+    gap:0;
+  }
+  .method-list li{
+    display:grid;
+    grid-template-columns: 44px 1fr;
+    gap:22px;
+    padding:28px 0;
+    border-top:1px solid var(--forest-line);
+  }
+  .method-list li:last-child{ border-bottom:1px solid var(--forest-line); }
+  .method-list .mark{ padding-top:6px; }
+  .method-list h3{
+    font-size:1.2rem;
+    color:var(--forest-dark);
+    margin-bottom:6px;
+  }
+  .method-list p{ color:var(--ink-soft); max-width:56ch; }
+
+  /* ---------- Situations ---------- */
+  .situations{ background:var(--paper-deep); }
+  .sit-grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:1px;
+    background:var(--forest-line);
+    border:1px solid var(--forest-line);
+  }
+  .sit-grid > div{
+    background:var(--paper-deep);
+    padding:30px 28px;
+  }
+  .sit-grid p{ margin:0; color:var(--ink); }
+  @media (max-width:720px){
+    .sit-grid{ grid-template-columns:1fr; }
+  }
+
+  /* ---------- Who it's for ---------- */
+  .forwhom-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:64px;
+  }
+  .check-list{
+    list-style:none; margin:0; padding:0;
+  }
+  .check-list li{
+    display:grid;
+    grid-template-columns: 20px 1fr;
+    gap:14px;
+    padding:11px 0;
+    font-size:1rem;
+  }
+  .check-list li svg{ margin-top:5px; }
+  .closing-note{
+    align-self:end;
+    border-left:3px solid var(--amber);
+    padding-left:24px;
+  }
+  .closing-note p{ font-size:1.08rem; color:var(--ink); }
+  @media (max-width:840px){
+    .forwhom-grid{ grid-template-columns:1fr; gap:32px;}
+    .closing-note{ border-left:none; border-top:3px solid var(--amber); padding-left:0; padding-top:20px; }
+  }
+
+  /* ---------- What you get ---------- */
+  .whatget-grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:36px 48px;
+  }
+  .whatget-grid div{
+    padding-top:18px;
+    border-top:1px solid var(--forest-line-dark);
+  }
+  section.on-dark .whatget-grid div{ border-top:1px solid var(--forest-line-dark); }
+  .whatget-grid h3{
+    font-size:1.02rem;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    color:var(--cream-text);
+    margin-bottom:6px;
+  }
+  .whatget-grid p{ color:#C9D0C1; font-size:0.98rem; margin:0; }
+  @media (max-width:720px){
+    .whatget-grid{ grid-template-columns:1fr; }
+  }
+
+  /* ---------- Online / table ---------- */
+  .online-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:64px;
+    align-items:start;
+  }
+  table.online-table{
+    width:100%;
+    border-collapse:collapse;
+  }
+  table.online-table th{
+    text-align:left;
+    font-family:'Inter';
+    font-weight:600;
+    font-size:0.92rem;
+    color:var(--ink-soft);
+    padding:0 0 14px;
+    border-bottom:1px solid var(--forest-line);
+  }
+  table.online-table td{
+    padding:16px 18px 16px 0;
+    border-bottom:1px solid var(--forest-line);
+    vertical-align:top;
+    font-size:0.98rem;
+  }
+  table.online-table td:first-child{ font-weight:500; color:var(--forest-dark); width:38%; }
+  .tech-box{
+    background:var(--paper-deep);
+    padding:28px 30px;
+    border-radius:var(--radius-soft);
+  }
+  .tech-box h3{ font-size:1.05rem; margin-bottom:10px; color:var(--forest-dark); }
+  .tech-box ul{ margin:0; padding-left:20px; color:var(--ink-soft); }
+  .tech-box li{ margin-bottom:6px; }
+  .tech-note{
+    margin-top:18px;
+    font-size:0.88rem;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+  @media (max-width:840px){
+    .online-grid{ grid-template-columns:1fr; gap:36px; }
+  }
+
+  /* ---------- Pricing ---------- */
+  .pricing{ background:var(--paper-deep); }
+  .price-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:0;
+    border:1px solid var(--forest-line);
+  }
+  .price-card{
+    background:var(--paper);
+    padding:34px 28px;
+    border-left:1px solid var(--forest-line);
+    display:flex;
+    flex-direction:column;
+  }
+  .price-card:first-child{ border-left:none; }
+  .price-card.featured{ background:var(--forest-dark); color:var(--cream-text); }
+  .price-card .name{
+    font-family:'Fraunces', serif;
+    font-size:1.28rem;
+    margin-bottom:2px;
+  }
+  .price-card.featured .name{ color:var(--cream-text); }
+  .price-card .dose{
+    font-size:0.9rem;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+  }
+  .price-card.featured .dose{ color:var(--amber-tint); }
+  .price-card .price{
+    font-family:'Fraunces', serif;
+    font-size:1.5rem;
+    color:var(--forest-dark);
+    margin-bottom:18px;
+  }
+  .price-card.featured .price{ color:var(--cream-text); }
+  .price-card .desc{
+    font-size:0.92rem;
+    color:var(--ink-soft);
+    margin-bottom:18px;
+  }
+  .price-card.featured .desc{ color:#C9D0C1; }
+  .price-card ul{
+    list-style:none; margin:0 0 26px; padding:0;
+    flex-grow:1;
+  }
+  .price-card ul li{
+    font-size:0.9rem;
+    padding:7px 0 7px 18px;
+    position:relative;
+    color:var(--ink);
+  }
+  .price-card.featured ul li{ color:var(--cream-text); }
+  .price-card ul li::before{
+    content:"";
+    position:absolute; left:0; top:15px;
+    width:6px; height:1px;
+    background:var(--amber);
+  }
+  .price-card .btn{ width:100%; justify-content:center; margin-top:auto; }
+  @media (max-width:980px){
+    .price-grid{ grid-template-columns:1fr 1fr; }
+    .price-card{ border-left:1px solid var(--forest-line); border-top:1px solid var(--forest-line); }
+    .price-card:nth-child(1), .price-card:nth-child(2){ border-top:none; }
+    .price-card:nth-child(odd){ border-left:none; }
+  }
+  @media (max-width:600px){
+    .price-grid{ grid-template-columns:1fr; }
+    .price-card{ border-left:none !important; border-top:1px solid var(--forest-line); }
+    .price-card:first-child{ border-top:none; }
+  }
+
+  /* ---------- FAQ ---------- */
+  .faq{ max-width:820px; }
+  .faq details{
+    border-bottom:1px solid var(--forest-line);
+    padding:22px 0;
+  }
+  .faq details:first-child{ border-top:1px solid var(--forest-line); }
+  .faq summary{
+    cursor:pointer;
+    list-style:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:24px;
+    font-family:'Fraunces', serif;
+    font-size:1.12rem;
+    color:var(--forest-dark);
+  }
+  .faq summary::-webkit-details-marker{ display:none; }
+  .faq summary .plus{
+    flex:none;
+    width:22px; height:22px;
+    position:relative;
+  }
+  .faq summary .plus::before, .faq summary .plus::after{
+    content:"";
+    position:absolute;
+    background:var(--forest);
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+  }
+  .faq summary .plus::before{ width:14px; height:2px; }
+  .faq summary .plus::after{ width:2px; height:14px; transition:transform .18s ease; }
+  .faq details[open] summary .plus::after{ transform:translate(-50%,-50%) rotate(90deg); opacity:0; }
+  .faq .answer{
+    color:var(--ink-soft);
+    max-width:66ch;
+    margin-top:14px;
+    font-size:0.98rem;
+  }
+
+  /* ---------- Final CTA ---------- */
+  .final-cta{
+    background:var(--forest-dark);
+    color:var(--cream-text);
+    text-align:left;
+  }
+  .final-cta .inner{
+    max-width:640px;
+  }
+  .final-cta h2{
+    color:var(--cream-text);
+    font-size:clamp(1.9rem, 3.4vw, 2.6rem);
+  }
+  .final-cta p{ color:#D7DECE; font-size:1.08rem; }
+  .final-cta .cta-row{
+    display:flex; gap:18px; margin-top:28px; flex-wrap:wrap;
+  }
+
+  /* ---------- Footer ---------- */
+  footer{
+    padding:44px 0;
+    border-top:1px solid var(--forest-line);
+  }
+  .footer-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  footer .wordmark{ font-size:1.15rem; }
+  footer .fine{ color:var(--ink-soft); font-size:0.86rem; }
+
+  /* ---------- Mobile nav ---------- */
+  @media (max-width:760px){
+    .nav-links{ display:none; }
+    .nav-right .btn-ghost{ display:none; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+
+  :focus-visible{
+    outline:2px solid var(--amber);
+    outline-offset:3px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <a href="#top" class="wordmark">Be Fluent</a>
+    <ul class="nav-links">
+      <li><a href="#hogyan">Hogyan dolgozunk</a></li>
+      <li><a href="#kinek">Kinek szól</a></li>
+      <li><a href="#csomagok">Csomagok</a></li>
+      <li><a href="#gyik">GYIK</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="#csomagok" class="btn btn-ghost">Csomagok</a>
+      <a href="#foglalas" class="btn">Időpontot foglalok</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <h1>Tudsz angolul. Most tanulj meg megszólalni.</h1>
+        <p class="lede">100%-ban online, beszédközpontú angolórák haladóknak, akik értik a nyelvet, mégsem beszélnek magabiztosan. Nincs tankönyv, nincs nyelvtani feladatsor, nincs javítás minden mondat után — valódi, személyre szabott beszélgetések vannak, bárhonnan.</p>
+        <div class="cta-row">
+          <a href="#foglalas" class="btn btn-amber">Első online beszélgetés foglalása</a>
+          <a href="#hogyan" class="btn btn-ghost">Hogyan dolgozunk?</a>
+        </div>
+      </div>
+      <div class="hero-photo-wrap">
+        <div class="hero-photo">
+          <img src="assets/eszter-lelik.jpg" alt="Lelik Eszter angoltanár egy online órán, fejhallgatóval és mikrofonnal, laptopján 'Be Fluent' felirattal.">
+        </div>
+        <div class="hero-wave-badge">
+          <div class="wave on-dark" aria-hidden="true">
+            <span style="height:8px"></span><span style="height:16px"></span><span style="height:10px"></span>
+            <span style="height:20px"></span><span style="height:12px"></span><span style="height:18px"></span>
+            <span style="height:9px"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECOGNITION -->
+  <section id="ismeros">
+    <div class="container">
+      <div class="section-head">
+        <h2>Ismerős ez az érzés?</h2>
+        <p class="lede">Sokat tanultál angolul. Megérted a filmeket, elolvasod a szakmai anyagokat, és valószínűleg a nyelvtant is jól ismered. De amikor meg kell szólalni...</p>
+      </div>
+      <div class="recognize">
+        <ul class="recognize-list">
+          <li>Túl sokáig keresed a megfelelő szavakat.</li>
+          <li>Fejben először magyarul fogalmazol.</li>
+          <li>Félsz attól, hogy hibázol.</li>
+          <li>Egyszerűbb mondatokat használsz, mint amire valójában képes lennél.</li>
+          <li>Egy állásinterjún, prezentáción vagy tárgyaláson leblokkolsz.</li>
+          <li>Csak utólag jut eszedbe, mit kellett volna mondanod.</li>
+        </ul>
+        <div class="reframe">
+          <p>Nem feltétlenül több nyelvtanra vagy nagyobb szókincsre van szükséged.</p>
+          <p><strong>Hanem arra, hogy valódi helyzetekben elkezdd használni azt az angolt, amelyet már tudsz.</strong></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="rolam">
+    <div class="container about-grid">
+      <div class="about-photo">
+        <img src="assets/eszter-lelik_2.jpg" alt="Lelik Eszter portréja.">
+      </div>
+      <div>
+        <p class="role">Haladó beszédfejlesztés · Online egyéni órák</p>
+        <h2>Szia, Lelik Eszter vagyok</h2>
+        <p>Angoltanárként abban segítek, hogy a már meglévő nyelvtudásod végre megszólaljon. Azokkal dolgozom, akik már sokat tanultak angolul, értik a nyelvet, és megfelelő szókinccsel is rendelkeznek — beszéd közben mégis bizonytalanná válnak, leblokkolnak, vagy fejben folyamatosan magyarból fordítanak.</p>
+        <p>Az óráimon nem kell minden mondatnak tökéletesnek lennie. Nem állítalak meg minden hibánál, mert először a folyamatos és természetes kommunikációt építjük fel. A fontos, visszatérő hibákkal célzottan foglalkozunk.</p>
+        <p>Nem egy tankönyv sorrendjét követjük. Rólad, a céljaidról és azokról a helyzetekről beszélünk, amelyekben valóban angolul kell kommunikálnod. Minden órát online tartok, így bárhonnan csatlakozhatsz — csak stabil internetkapcsolatra, kamerára és mikrofonra van szükséged.</p>
+        <p><strong style="color:var(--cream-text)">Nem az a cél, hogy hibátlan angol mondatokat gyárts. Az a cél, hogy legyen mit mondanod — és ki is tudd mondani.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW WE WORK -->
+  <section id="hogyan">
+    <div class="container">
+      <div class="section-head">
+        <h2>Hogyan dolgozunk?</h2>
+      </div>
+      <ul class="method-list">
+        <li>
+          <div class="mark" aria-hidden="true">
+            <div class="wave"><span style="height:6px"></span><span style="height:14px"></span><span style="height:9px"></span></div>
+          </div>
+          <div>
+            <h3>Nincs tankönyv</h3>
+            <p>Nincs kötelező tankönyv, előre gyártott lecke vagy nyelvtani feladatsor. A beszélgetések témáját a céljaid, az érdeklődésed és azok a helyzetek adják, amelyekben valóban angolul kell megszólalnod.</p>
+          </div>
+        </li>
+        <li>
+          <div class="mark" aria-hidden="true">
+            <div class="wave"><span style="height:6px"></span><span style="height:14px"></span><span style="height:9px"></span></div>
+          </div>
+          <div>
+            <h3>Valódi beszélgetéseket folytatunk</h3>
+            <p>Az órák középpontjában végig az aktív angol beszéd áll. Nem rólad beszélek, hanem veled beszélgetek. Kérdezünk, reagálunk, pontosítunk, véleményt formálunk és érvelünk — úgy, ahogyan a való életben is.</p>
+          </div>
+        </li>
+        <li>
+          <div class="mark" aria-hidden="true">
+            <div class="wave"><span style="height:6px"></span><span style="height:14px"></span><span style="height:9px"></span></div>
+          </div>
+          <div>
+            <h3>Nem állítalak meg minden hibánál</h3>
+            <p>A folyamatos kommunikáció fontosabb annál, hogy minden mondat azonnal tökéletes legyen. Nem szakítom félbe a gondolatmenetedet minden apró hiba miatt. A lényeges, visszatérő problémákkal célzottan foglalkozunk, anélkül, hogy elveszítenéd a beszéd lendületét.</p>
+          </div>
+        </li>
+        <li>
+          <div class="mark" aria-hidden="true">
+            <div class="wave"><span style="height:6px"></span><span style="height:14px"></span><span style="height:9px"></span></div>
+          </div>
+          <div>
+            <h3>Angolul gondolkodunk</h3>
+            <p>Nem magyar mondatokat fordítunk le szóról szóra. Olyan kifejezéseket, reakciókat és gondolkodási mintákat gyakorlunk, amelyek természetesen működnek angolul — nem az angolra fordított magyar beszédet, hanem az önálló, természetes angol kommunikációt.</p>
+          </div>
+        </li>
+        <li>
+          <div class="mark" aria-hidden="true">
+            <div class="wave"><span style="height:6px"></span><span style="height:14px"></span><span style="height:9px"></span></div>
+          </div>
+          <div>
+            <h3>Az általad kitűzött célra készülünk</h3>
+            <p>Nincs mindenkire ráhúzható tanmenet. A beszélgetéseket és a feladatokat ahhoz igazítjuk, amire neked ténylegesen szükséged van.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SITUATIONS -->
+  <section class="situations">
+    <div class="container">
+      <div class="section-head">
+        <h2>Milyen helyzetekre készülhetünk?</h2>
+      </div>
+      <div class="sit-grid">
+        <div><p><strong>Állásinterjú</strong> — hogy ne csak tudd, mit szeretnél mondani, hanem magabiztosan ki is tudd fejezni.</p></div>
+        <div><p><strong>Prezentáció vagy előadás</strong> — hogy érthetően, természetesen és hitelesen beszélj.</p></div>
+        <div><p><strong>Üzleti tárgyalás vagy megbeszélés</strong> — hogy gyorsabban tudj reagálni, és pontosabban képviseld az álláspontodat.</p></div>
+        <div><p><strong>Külföldi munkavégzés</strong> — hogy könnyebben bekapcsolódj a szakmai és hétköznapi beszélgetésekbe.</p></div>
+        <div><p><strong>Vizsga szóbeli része</strong> — hogy nyomás alatt is folyamatosan tudj beszélni.</p></div>
+        <div><p><strong>Hétköznapi kommunikáció</strong> — hogy ne csak megérts másokat, hanem természetesen részt is vegyél a beszélgetésekben.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHO IT'S FOR -->
+  <section id="kinek">
+    <div class="container">
+      <div class="section-head">
+        <h2>Kinek hasznos mindez?</h2>
+        <p class="lede">Ez a program neked szól, ha:</p>
+      </div>
+      <div class="forwhom-grid">
+        <ul class="check-list">
+          <li><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="#B9832E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Legalább stabil középhaladó, inkább haladó szinten vagy.</span></li>
+          <li><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="#B9832E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sok mindent értesz, de nehezen szólalsz meg.</span></li>
+          <li><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="#B9832E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Fejben még rendszeresen magyarból fordítasz.</span></li>
+          <li><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="#B9832E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Beszéd közben gyakran leblokkolsz.</span></li>
+          <li><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="#B9832E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Folyékonyabban és természetesebben szeretnél kommunikálni.</span></li>
+          <li><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="#B9832E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Konkrét szakmai vagy magánéleti helyzetre készülsz.</span></li>
+          <li><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="#B9832E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Nem hagyományos angolórát keresel.</span></li>
+          <li><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="#B9832E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Vállalod, hogy az órán valóban angolul beszélsz.</span></li>
+        </ul>
+        <div class="closing-note">
+          <p>Ez nem kezdő angolkurzus. Nem az alapnyelvtant tanuljuk meg, hanem a már meglévő tudásodat tesszük gyorsabban, szabadabban és magabiztosabban használhatóvá.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT YOU GET -->
+  <section class="about" style="padding-top:88px;">
+    <div class="container">
+      <div class="section-head">
+        <h2>Mit kapsz az órákon?</h2>
+      </div>
+      <div class="whatget-grid">
+        <div><h3>Maximális beszédidő</h3><p>A folyékony beszédet beszéddel lehet fejleszteni.</p></div>
+        <div><h3>Valós helyzetekhez kapcsolódó témák</h3><p>Olyan témák, amelyeknek számodra is van jelentőségük.</p></div>
+        <div><h3>Személyre szabott kérdések és szituációk</h3><p>Nem általános tankönyvi feladatok.</p></div>
+        <div><h3>Azonnal használható kifejezések</h3><p>Nem elszigetelt, bemagolandó szólisták.</p></div>
+        <div><h3>Célzott visszajelzés</h3><p>A valóban fontos és rendszeresen visszatérő hibákról.</p></div>
+        <div><h3>Biztonságos közeg</h3><p>Ahol nem baj, ha elsőre nem tökéletes.</p></div>
+        <div><h3>Gyakorlat a gyors reagálásban</h3><p>Hogy ne kelljen minden mondatot előre lefordítanod.</p></div>
+        <div><h3>Személyes figyelem</h3><p>Az órák egyénileg zajlanak.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 100% ONLINE -->
+  <section id="online">
+    <div class="container">
+      <div class="section-head">
+        <h2>Minden óra 100%-ban online</h2>
+        <p class="lede">Az online forma nem kompromisszum, hanem a módszer része. Olyan környezetből kapcsolódhatsz be, ahol kényelmesen és felszabadultan tudsz beszélni — nincs utazás, várakozás vagy helyhez kötöttség.</p>
+      </div>
+      <div class="online-grid">
+        <table class="online-table">
+          <thead>
+            <tr><th>Amit kapsz</th><th>Mit jelent számodra</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Élő, egyéni online óra</td><td>Végig személyes figyelmet kapsz.</td></tr>
+            <tr><td>Rugalmas helyszín</td><td>Bárhonnan csatlakozhatsz.</td></tr>
+            <tr><td>Saját helyzetekre épülő témák</td><td>A számodra fontos beszélgetésekre készülünk.</td></tr>
+            <tr><td>Kényelmes környezet</td><td>Onnan beszélhetsz, ahol felszabadultabb vagy.</td></tr>
+            <tr><td>Egyszerű csatlakozás</td><td>Nem kell utazással időt töltened.</td></tr>
+          </tbody>
+        </table>
+        <div class="tech-box">
+          <h3>Technikai feltételek</h3>
+          <ul>
+            <li>Stabil internetkapcsolat</li>
+            <li>Kamera és mikrofon</li>
+            <li>Egy nyugodt hely, ahol zavartalanul tudsz beszélni</li>
+          </ul>
+          <p class="tech-note">Az órák Zoomon vagy Google Meet-en zajlanak.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="csomagok">
+    <div class="container">
+      <div class="section-head">
+        <h2>Csomagok és árak</h2>
+      </div>
+      <div class="price-grid">
+        <div class="price-card">
+          <div class="name">Első online beszélgetés</div>
+          <div class="dose">30 perc</div>
+          <div class="price">7 900 Ft</div>
+          <p class="desc">Megismerjük egymást, felmérjük a jelenlegi helyzetedet, és meghatározzuk, mi akadályoz leginkább a megszólalásban.</p>
+          <ul>
+            <li>Rövid beszélgetés angolul</li>
+            <li>A céljaid és a nehézségeid feltérképezése</li>
+            <li>Személyes visszajelzés</li>
+            <li>Javaslat a további közös munkára</li>
+          </ul>
+          <a href="#foglalas" class="btn btn-ghost">Első beszélgetés foglalása</a>
+        </div>
+        <div class="price-card">
+          <div class="name">Fókusz csomag</div>
+          <div class="dose">4 × 50 perc</div>
+          <div class="price">39 900 Ft</div>
+          <p class="desc">Azoknak, akik egy konkrét kommunikációs nehézségen szeretnének dolgozni, vagy kipróbálnák a beszédközpontú módszert.</p>
+          <ul>
+            <li>Négy élő, egyéni online óra</li>
+            <li>Személyre szabott beszélgetési témák</li>
+            <li>Célzott visszajelzés</li>
+            <li>A fontos kifejezések és fejlesztési pontok összefoglalása</li>
+          </ul>
+          <a href="#foglalas" class="btn btn-ghost">Fókusz csomagot választom</a>
+        </div>
+        <div class="price-card featured">
+          <div class="name">Intenzív csomag</div>
+          <div class="dose">8 × 50 perc</div>
+          <div class="price">74 900 Ft</div>
+          <p class="desc">Azoknak, akik rendszeresen szeretnének beszélni, és látványosabb változást szeretnének elérni a folyékonyságban és a magabiztosságban.</p>
+          <ul>
+            <li>Nyolc élő, egyéni online óra</li>
+            <li>Személyre szabott beszédfejlesztési fókusz</li>
+            <li>Rendszeres és célzott visszajelzés</li>
+            <li>Valós kommunikációs helyzetek gyakorlása</li>
+            <li>A fejlődés folyamatos követése</li>
+          </ul>
+          <a href="#foglalas" class="btn btn-amber">Intenzív csomagot választom</a>
+        </div>
+        <div class="price-card">
+          <div class="name">Célzott felkészülés</div>
+          <div class="dose">Egyedi csomag</div>
+          <div class="price">Egyedi árajánlat</div>
+          <p class="desc">Ha állásinterjúra, prezentációra, üzleti tárgyalásra, vizsgára vagy más konkrét helyzetre készülsz, az órákat teljesen ehhez igazítjuk.</p>
+          <ul>
+            <li>A helyzetedre szabott tematika</li>
+            <li>Rugalmas óraszám</li>
+            <li>Egyedi árajánlat</li>
+          </ul>
+          <a href="#foglalas" class="btn btn-ghost">Célzott felkészülést kérek</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="gyik">
+    <div class="container">
+      <div class="section-head">
+        <h2>Gyakori kérdések</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Kezdőként is jelentkezhetek?<span class="plus" aria-hidden="true"></span></summary>
+          <p class="answer">Ez a program nem kezdőknek készült. Akkor tudunk eredményesen együtt dolgozni, ha már érted az angolt, rendelkezel használható szókinccsel és nyelvtani alapokkal, de a megszólalás még nehézséget okoz.</p>
+        </details>
+        <details>
+          <summary>Tényleg nincs tankönyv?<span class="plus" aria-hidden="true"></span></summary>
+          <p class="answer">Nincs hagyományos értelemben vett, kötelező tankönyv. A beszélgetések a céljaidra és a valós kommunikációs helyzeteidre épülnek. Szükség esetén használhatunk rövid cikket, videót, kérdéssort vagy más kiinduló anyagot, de ezek a beszélgetést szolgálják.</p>
+        </details>
+        <details>
+          <summary>Kijavítod a hibáimat?<span class="plus" aria-hidden="true"></span></summary>
+          <p class="answer">Igen, de nem állítalak meg minden mondat után. A beszélgetés lendületét megtartjuk, majd célzottan foglalkozunk azokkal a hibákkal, amelyek visszatérnek, félreértést okoznak, vagy akadályozzák a természetes kommunikációt.</p>
+        </details>
+        <details>
+          <summary>Mi történik, ha nem jut eszembe egy szó?<span class="plus" aria-hidden="true"></span></summary>
+          <p class="answer">Nem fordítunk vissza automatikusan magyarra. Megtanulod körülírni, másképp megfogalmazni és a már meglévő szókincsedből megoldani a helyzetet. Ez a valódi kommunikáció egyik legfontosabb készsége.</p>
+        </details>
+        <details>
+          <summary>Minden óra online van?<span class="plus" aria-hidden="true"></span></summary>
+          <p class="answer">Igen. Minden alkalom 100%-ban online zajlik, személyes részvételre nincs szükség.</p>
+        </details>
+        <details>
+          <summary>Milyen eszköz kell az órához?<span class="plus" aria-hidden="true"></span></summary>
+          <p class="answer">Stabil internetkapcsolat, kamera, mikrofon és egy nyugodt hely, ahol zavartalanul tudsz beszélni.</p>
+        </details>
+        <details>
+          <summary>Milyen nyelven zajlik az óra?<span class="plus" aria-hidden="true"></span></summary>
+          <p class="answer">Elsősorban angolul. A cél az, hogy egyre kevésbé támaszkodj a magyar nyelvre, és megtanulj közvetlenül angolul reagálni.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta" id="foglalas">
+    <div class="container">
+      <div class="inner">
+        <h2>Ne csak értsd az angolt. Használd is!</h2>
+        <p>Az első online beszélgetésen feltérképezzük, mi akadályoz a megszólalásban, milyen helyzetekre készülsz, és hogyan lehet a meglévő tudásodból természetesebb, magabiztosabb kommunikáció. Nem kell tökéletesen beszélned ahhoz, hogy elkezdj folyamatosan, magabiztosan beszélni.</p>
+        <div class="cta-row">
+          <a href="#" class="btn btn-amber">Időpontot foglalok</a>
+          <span style="color:#9FA894; font-size:0.92rem; align-self:center;">30 perc · 7 900 Ft</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container footer-row">
+    <a href="#top" class="wordmark">Be Fluent</a>
+    <p class="fine">100%-ban online, egyéni angol beszédfejlesztés haladóknak. © <span id="year"></span> Lelik Eszter.</p>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Close other open FAQ items when one opens, for a tidier reading flow
+  document.querySelectorAll('.faq details').forEach(function(el){
+    el.addEventListener('toggle', function(){
+      if(el.open){
+        document.querySelectorAll('.faq details').forEach(function(other){
+          if(other !== el) other.open = false;
+        });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
