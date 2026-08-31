@@ -532,23 +532,99 @@
     font-size:0.98rem;
   }
 
-  /* ---------- Final CTA ---------- */
+  /* ---------- Final CTA / booking ---------- */
   .final-cta{
     background:var(--forest-dark);
     color:var(--cream-text);
     text-align:left;
   }
+  .final-grid{
+    display:grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap:64px;
+    align-items:start;
+  }
   .final-cta .inner{
-    max-width:640px;
+    max-width:480px;
+    position:sticky;
+    top:110px;
   }
   .final-cta h2{
     color:var(--cream-text);
     font-size:clamp(1.9rem, 3.4vw, 2.6rem);
   }
   .final-cta p{ color:#D7DECE; font-size:1.08rem; }
-  .final-cta .cta-row{
-    display:flex; gap:18px; margin-top:28px; flex-wrap:wrap;
+  .final-cta .fine-print{
+    color:#9FA894;
+    font-size:0.88rem;
+    margin-top:20px;
   }
+  @media (max-width:900px){
+    .final-grid{ grid-template-columns:1fr; gap:40px; }
+    .final-cta .inner{ position:static; max-width:none; }
+  }
+
+  .booking-card{
+    background:var(--paper);
+    border-radius:var(--radius-soft);
+    padding:38px 36px;
+  }
+  @media (max-width:520px){ .booking-card{ padding:28px 22px; } }
+  .field{ margin-bottom:18px; }
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  @media (max-width:520px){ .field-row{ grid-template-columns:1fr; } }
+  .field label{
+    display:block;
+    font-size:0.85rem;
+    font-weight:500;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .field input,
+  .field select,
+  .field textarea{
+    width:100%;
+    padding:11px 13px;
+    border:1px solid var(--forest-line);
+    border-radius:var(--radius-soft);
+    font-family:'Inter', sans-serif;
+    font-size:0.96rem;
+    color:var(--ink);
+    background:#fff;
+  }
+  .field textarea{ resize:vertical; min-height:88px; }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus{
+    outline:2px solid var(--amber);
+    outline-offset:1px;
+    border-color:var(--amber);
+  }
+  .field-hint{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
+  .hp-field{
+    position:absolute;
+    left:-9999px;
+    width:1px; height:1px;
+    overflow:hidden;
+  }
+  .booking-card .btn{ width:100%; justify-content:center; margin-top:6px; }
+  .booking-card .btn[disabled]{ opacity:0.6; cursor:default; }
+  .form-status{
+    margin-top:16px;
+    font-size:0.92rem;
+    display:none;
+  }
+  .form-status.is-visible{ display:block; }
+  .form-status.success{ color:#2F5D34; }
+  .form-status.error{ color:#A13D2A; }
 
   /* ---------- Footer ---------- */
   footer{
@@ -657,7 +733,7 @@
   <section class="about" id="rolam">
     <div class="container about-grid">
       <div class="about-photo">
-        <img src="assets/eszter-lelik_2.jpg" alt="Lelik Eszter portréja.">
+        <img src="assets/eszter-lelik-portrait.jpg" alt="Lelik Eszter portréja.">
       </div>
       <div>
         <p class="role">Haladó beszédfejlesztés · Online egyéni órák</p>
@@ -838,7 +914,7 @@
             <li>Személyes visszajelzés</li>
             <li>Javaslat a további közös munkára</li>
           </ul>
-          <a href="#foglalas" class="btn btn-ghost">Első beszélgetés foglalása</a>
+          <a href="#foglalas" class="btn btn-ghost js-pkg-btn" data-package="Első online beszélgetés (30 perc)">Első beszélgetés foglalása</a>
         </div>
         <div class="price-card">
           <div class="name">Fókusz csomag</div>
@@ -851,7 +927,7 @@
             <li>Célzott visszajelzés</li>
             <li>A fontos kifejezések és fejlesztési pontok összefoglalása</li>
           </ul>
-          <a href="#foglalas" class="btn btn-ghost">Fókusz csomagot választom</a>
+          <a href="#foglalas" class="btn btn-ghost js-pkg-btn" data-package="Fókusz csomag (4×50 perc)">Fókusz csomagot választom</a>
         </div>
         <div class="price-card featured">
           <div class="name">Intenzív csomag</div>
@@ -865,7 +941,7 @@
             <li>Valós kommunikációs helyzetek gyakorlása</li>
             <li>A fejlődés folyamatos követése</li>
           </ul>
-          <a href="#foglalas" class="btn btn-amber">Intenzív csomagot választom</a>
+          <a href="#foglalas" class="btn btn-amber js-pkg-btn" data-package="Intenzív csomag (8×50 perc)">Intenzív csomagot választom</a>
         </div>
         <div class="price-card">
           <div class="name">Célzott felkészülés</div>
@@ -877,7 +953,7 @@
             <li>Rugalmas óraszám</li>
             <li>Egyedi árajánlat</li>
           </ul>
-          <a href="#foglalas" class="btn btn-ghost">Célzott felkészülést kérek</a>
+          <a href="#foglalas" class="btn btn-ghost js-pkg-btn" data-package="Célzott felkészülés (egyedi)">Célzott felkészülést kérek</a>
         </div>
       </div>
     </div>
@@ -922,16 +998,76 @@
     </div>
   </section>
 
-  <!-- FINAL CTA -->
+  <!-- FINAL CTA / BOOKING -->
   <section class="final-cta" id="foglalas">
-    <div class="container">
+    <div class="container final-grid">
       <div class="inner">
         <h2>Ne csak értsd az angolt. Használd is!</h2>
-        <p>Az első online beszélgetésen feltérképezzük, mi akadályoz a megszólalásban, milyen helyzetekre készülsz, és hogyan lehet a meglévő tudásodból természetesebb, magabiztosabb kommunikáció. Nem kell tökéletesen beszélned ahhoz, hogy elkezdj folyamatosan, magabiztosan beszélni.</p>
-        <div class="cta-row">
-          <a href="#" class="btn btn-amber">Időpontot foglalok</a>
-          <span style="color:#9FA894; font-size:0.92rem; align-self:center;">30 perc · 7 900 Ft</span>
-        </div>
+        <p>Válassz egy neked megfelelő napot, és küldd el a kérésed. Eszter e-mailben (vagy telefonon) egyezteti veled a pontos időpontot, hogy mindkettőtöknek jó legyen.</p>
+        <p class="fine-print">Időpontot a következő 3 napra tudsz kérni — ha ennél messzebbre terveznél, írd meg az üzenetben, és külön egyeztetünk.</p>
+      </div>
+
+      <div class="booking-card">
+        <form id="booking-form">
+          <!-- honeypot spam trap, left empty by real visitors -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="website">Website</label>
+            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="bf-name">Neved</label>
+              <input type="text" id="bf-name" name="name" required autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="bf-email">E-mail címed</label>
+              <input type="email" id="bf-email" name="email" required autocomplete="email">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="bf-phone">Telefonszám <span style="font-weight:400;">(nem kötelező)</span></label>
+              <input type="tel" id="bf-phone" name="phone" autocomplete="tel">
+            </div>
+            <div class="field">
+              <label for="bf-package">Melyik csomag érdekel?</label>
+              <select id="bf-package" name="package">
+                <option value="Első online beszélgetés (30 perc)">Első online beszélgetés (30 perc)</option>
+                <option value="Fókusz csomag (4×50 perc)">Fókusz csomag (4×50 perc)</option>
+                <option value="Intenzív csomag (8×50 perc)">Intenzív csomag (8×50 perc)</option>
+                <option value="Célzott felkészülés (egyedi)">Célzott felkészülés (egyedi)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="bf-date">Melyik napon érnél rá?</label>
+              <input type="date" id="bf-date" name="preferred_date" required>
+              <p class="field-hint" id="bf-date-hint"></p>
+            </div>
+            <div class="field">
+              <label for="bf-time">Napszak</label>
+              <select id="bf-time" name="preferred_time">
+                <option value="Bármikor">Bármikor</option>
+                <option value="Délelőtt (9–12)">Délelőtt (9–12)</option>
+                <option value="Kora délután (12–16)">Kora délután (12–16)</option>
+                <option value="Késő délután (16–19)">Késő délután (16–19)</option>
+                <option value="Este (19 után)">Este (19 után)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="bf-message">Üzenet <span style="font-weight:400;">(nem kötelező)</span></label>
+            <textarea id="bf-message" name="message" placeholder="Pl. mire készülsz, vagy ha egy másik időpont jobban jönne."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-amber" id="bf-submit">Kérésem elküldése</button>
+          <p class="form-status" id="bf-status" role="status"></p>
+        </form>
       </div>
     </div>
   </section>
@@ -958,6 +1094,125 @@
       }
     });
   });
+
+  // ---------------------------------------------------------------
+  // BOOKING FORM
+  // ---------------------------------------------------------------
+  // 1) Sends each request straight to befluent.hu@gmail.com via Web3Forms
+  //    (a free form-to-email relay — no server needed for a static site).
+  //    TO ACTIVATE: go to https://web3forms.com, enter befluent.hu@gmail.com,
+  //    you'll instantly get an Access Key by email. Paste it below.
+  var WEB3FORMS_ACCESS_KEY = "60283fe2-7189-4f2a-a0d1-d8f748db312d";
+
+  // 2) Only the next 3 days are selectable in the date picker.
+  var MIN_NOTICE_DAYS = 3;   // can't book for today
+  var MAX_ADVANCE_DAYS = 60;  // furthest bookable day from today
+
+  (function setupDateWindow(){
+    var dateInput = document.getElementById('bf-date');
+    var hint = document.getElementById('bf-date-hint');
+    if(!dateInput) return;
+
+    function toISO(d){
+      var y = d.getFullYear();
+      var m = String(d.getMonth()+1).padStart(2,'0');
+      var day = String(d.getDate()).padStart(2,'0');
+      return y+'-'+m+'-'+day;
+    }
+    function fmtHu(d){
+      return d.toLocaleDateString('hu-HU', { month:'long', day:'numeric' });
+    }
+
+    var today = new Date();
+    var minDate = new Date(today); minDate.setDate(today.getDate() + MIN_NOTICE_DAYS);
+    var maxDate = new Date(today); maxDate.setDate(today.getDate() + MAX_ADVANCE_DAYS);
+
+    dateInput.min = toISO(minDate);
+    dateInput.max = toISO(maxDate);
+    if(hint){
+      hint.textContent = 'Foglalható: ' + fmtHu(minDate) + ' – ' + fmtHu(maxDate) + ' között.';
+    }
+  })();
+
+  // Package buttons scroll to the form and pre-select the matching package
+  document.querySelectorAll('.js-pkg-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var select = document.getElementById('bf-package');
+      var pkg = btn.getAttribute('data-package');
+      if(select && pkg){ select.value = pkg; }
+    });
+  });
+
+  // Submit the form via fetch, no page reload, inline status message
+  var form = document.getElementById('booking-form');
+  var statusEl = document.getElementById('bf-status');
+  var submitBtn = document.getElementById('bf-submit');
+
+  if(form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+
+      // Honeypot: if this hidden field got filled in, silently drop it
+      if(form.website.value){ return; }
+
+      if(WEB3FORMS_ACCESS_KEY.indexOf('PASTE-YOUR') === 0){
+        statusEl.textContent = 'A foglalási űrlap még nincs bekötve — add meg a Web3Forms kulcsot a kód elején.';
+        statusEl.className = 'form-status is-visible error';
+        return;
+      }
+
+      var formData = new FormData(form);
+      formData.append('access_key', WEB3FORMS_ACCESS_KEY);
+      formData.append('subject', 'Új időpont-kérés — Be Fluent (' + (formData.get('package') || '') + ')');
+      formData.append('from_name', 'Be Fluent — weboldal');
+      formData.append('replyto', formData.get('email'));
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Küldés...';
+      statusEl.className = 'form-status is-visible';
+      statusEl.textContent = '';
+
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData
+      })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if(data.success){
+          form.reset();
+          setupDateWindowAgain();
+          statusEl.textContent = 'Köszönjük! Eszter hamarosan felveszi veled a kapcsolatot a megadott elérhetőségen.';
+          statusEl.className = 'form-status is-visible success';
+        } else {
+          throw new Error(data.message || 'Ismeretlen hiba');
+        }
+      })
+      .catch(function(){
+        statusEl.textContent = 'Hiba történt a küldés közben. Kérünk, próbáld meg újra, vagy írj közvetlenül a befluent.hu@gmail.com címre.';
+        statusEl.className = 'form-status is-visible error';
+      })
+      .finally(function(){
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Kérésem elküldése';
+      });
+    });
+  }
+
+  // re-apply date min/max after a successful reset (min day may have shifted)
+  function setupDateWindowAgain(){
+    var dateInput = document.getElementById('bf-date');
+    if(!dateInput) return;
+    var today = new Date();
+    function toISO(d){
+      var y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+      return y+'-'+m+'-'+day;
+    }
+    var minDate = new Date(today); minDate.setDate(today.getDate() + MIN_NOTICE_DAYS);
+    var maxDate = new Date(today); maxDate.setDate(today.getDate() + MAX_ADVANCE_DAYS);
+    dateInput.min = toISO(minDate);
+    dateInput.max = toISO(maxDate);
+  }
 </script>
 
 </body>
