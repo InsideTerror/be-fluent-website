@@ -388,11 +388,11 @@
   }
   table.online-table th{
     text-align:left;
-    font-family:'Inter';
-    font-weight:600;
-    font-size:0.92rem;
-    color:var(--ink-soft);
-    padding:0 0 14px;
+    font-family:'Fraunces', serif;
+    font-weight:560;
+    font-size:1.15rem;
+    color:var(--forest-dark);
+    padding:0 0 16px;
     border-bottom:1px solid var(--forest-line);
   }
   table.online-table td{
@@ -434,6 +434,8 @@
     border-left:1px solid var(--forest-line);
     display:flex;
     flex-direction:column;
+    position:relative;
+    z-index:1;
   }
   .price-card:first-child{ border-left:none; }
   .price-card.featured{ background:var(--forest-dark); color:var(--cream-text); }
@@ -479,7 +481,7 @@
     width:6px; height:1px;
     background:var(--amber);
   }
-  .price-card .btn{ width:100%; justify-content:center; margin-top:auto; }
+  .price-card .btn{ width:100%; justify-content:center; margin-top:auto; position:relative; z-index:2; pointer-events:auto; }
   @media (max-width:980px){
     .price-grid{ grid-template-columns:1fr 1fr; }
     .price-card{ border-left:1px solid var(--forest-line); border-top:1px solid var(--forest-line); }
@@ -666,7 +668,7 @@
   <div class="container nav">
     <a href="#top" class="wordmark">Be Fluent</a>
     <ul class="nav-links">
-      <li><a href="#hogyan">Hogyan dolgozunk</a></li>
+      <li><a href="#hogyan">Hogyan zajlanak az órák</a></li>
       <li><a href="#kinek">Kinek szól</a></li>
       <li><a href="#csomagok">Csomagok</a></li>
       <li><a href="#gyik">GYIK</a></li>
@@ -688,7 +690,7 @@
         <p class="lede">100%-ban online, beszédközpontú angolórák haladóknak, akik értik a nyelvet, mégsem beszélnek magabiztosan. Nincs tankönyv, nincs nyelvtani feladatsor, nincs javítás minden mondat után — valódi, személyre szabott beszélgetések vannak, bárhonnan.</p>
         <div class="cta-row">
           <a href="#foglalas" class="btn btn-amber">Első online beszélgetés foglalása</a>
-          <a href="#hogyan" class="btn btn-ghost">Hogyan dolgozunk?</a>
+          <a href="#hogyan" class="btn btn-ghost">Hogyan zajlanak az órák?</a>
         </div>
       </div>
       <div class="hero-photo-wrap">
@@ -751,7 +753,7 @@
   <section id="hogyan">
     <div class="container">
       <div class="section-head">
-        <h2>Hogyan dolgozunk?</h2>
+        <h2>Hogyan zajlanak az órák?</h2>
       </div>
       <ul class="method-list">
         <li>
@@ -907,7 +909,7 @@
         <div class="price-card">
           <div class="name">Első online beszélgetés</div>
           <div class="dose">30 perc</div>
-          <div class="price">7 900 Ft</div>
+          <div class="price">5 900 Ft</div>
           <p class="desc">Megismerjük egymást, felmérjük a jelenlegi helyzetedet, és meghatározzuk, mi akadályoz leginkább a megszólalásban.</p>
           <ul>
             <li>Rövid beszélgetés angolul</li>
@@ -1004,7 +1006,7 @@
     <div class="container final-grid">
       <div class="inner">
         <h2>Ne csak értsd az angolt. Használd is!</h2>
-        <p>Válassz egy neked megfelelő napot, és küldd el a kérésed. Eszter e-mailben (vagy telefonon) egyezteti veled a pontos időpontot, hogy mindkettőtöknek jó legyen.</p>
+        <p>Válassz egy neked megfelelő napot, és küldd el a kérésed. E-mailben vagy telefonon tudunk egyeztetni, pontosítani, a szabad időpontok függvényében.</p>
         <p class="fine-print">Időpontot a következő 3 napra tudsz kérni — ha ennél messzebbre terveznél, írd meg az üzenetben, és külön egyeztetünk.</p>
       </div>
 
