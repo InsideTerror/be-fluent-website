@@ -2,7 +2,8 @@
 // exposed as endpoints by Vercel.
 //
 // Required environment variables (Vercel → Project → Settings → Environment Variables):
-//   ADMIN_USER, ADMIN_PASSWORD           login for admin.befluent.hu
+//   ADMIN_USERS                          logins for admin.befluent.hu, as JSON:
+//                                        {"eszter":"password1","zalán":"password2"}
 //   KV_REST_API_URL, KV_REST_API_TOKEN   added automatically by the Upstash Redis
 //                                        integration (UPSTASH_REDIS_REST_* also work)
 import crypto from 'node:crypto';
@@ -76,12 +77,29 @@ export function sanitizeReviews(input) {
 }
 
 // ---------- Auth (signed session cookie) ----------
+// Case- and accent-insensitive, so "Zalán", "zalán" and "zalan" are the same user
+function normalizeUser(name) {
+  return String(name == null ? '' : name).trim().toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function adminUsers() {
+  let users;
+  try {
+    users = JSON.parse(process.env.ADMIN_USERS || '{}');
+  } catch (e) {
+    throw new Error('ADMIN_USERS is not valid JSON');
+  }
+  const entries = Object.entries(users)
+    .map(function ([name, pass]) { return [normalizeUser(name), String(pass)]; })
+    .filter(function ([name, pass]) { return name && pass; });
+  if (!entries.length) throw new Error('ADMIN_USERS is not set');
+  return entries;
+}
+
 function sessionKey() {
-  const user = process.env.ADMIN_USER;
-  const pass = process.env.ADMIN_PASSWORD;
-  if (!user || !pass) throw new Error('ADMIN_USER / ADMIN_PASSWORD are not set');
-  // Derived from the credentials, so changing the password logs everyone out
-  return crypto.createHash('sha256').update('bf-session:' + user + ':' + pass).digest();
+  // Derived from the credentials, so changing any password logs everyone out
+  return crypto.createHash('sha256').update('bf-session:' + process.env.ADMIN_USERS).digest();
 }
 
 function sign(payload) {
@@ -95,10 +113,15 @@ function safeEqual(a, b) {
 }
 
 export function checkCredentials(user, pass) {
-  // Evaluate both so timing doesn't reveal which one was wrong
-  const userOk = safeEqual(user, process.env.ADMIN_USER || '');
-  const passOk = safeEqual(pass, process.env.ADMIN_PASSWORD || '');
-  return userOk && passOk && !!process.env.ADMIN_USER && !!process.env.ADMIN_PASSWORD;
+  // Check every account fully so timing doesn't reveal which part was wrong
+  const name = normalizeUser(user);
+  let ok = false;
+  for (const [u, p] of adminUsers()) {
+    const userOk = safeEqual(name, u);
+    const passOk = safeEqual(pass, p);
+    if (userOk && passOk) ok = true;
+  }
+  return ok;
 }
 
 export function setSessionCookie(res) {
@@ -114,6 +137,7 @@ export function clearSessionCookie(res) {
 }
 
 export function isAuthenticated(req) {
+  adminUsers(); // throws if logins aren't configured
   const cookies = String(req.headers.cookie || '').split(';');
   for (const c of cookies) {
     const [name, value] = c.trim().split('=');
