@@ -431,6 +431,37 @@
     .online-grid{ grid-template-columns:1fr; gap:36px; }
   }
 
+  /* ---------- Reviews ---------- */
+  .reviews{ background:var(--forest-dark); color:var(--cream-text); }
+  .review-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap:36px 48px;
+  }
+  .review{
+    margin:0;
+    padding-top:22px;
+    border-top:1px solid var(--forest-line-dark);
+    display:flex;
+    flex-direction:column;
+  }
+  .review .stars{ color:var(--amber); letter-spacing:3px; font-size:0.95rem; margin-bottom:10px; }
+  .review blockquote{
+    margin:0 0 18px;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:440;
+    font-size:1.12rem;
+    line-height:1.5;
+    color:var(--cream-text);
+    white-space:pre-line;
+  }
+  .review figcaption{ margin-top:auto; font-size:0.95rem; color:var(--amber-tint); font-weight:500; }
+  .review figcaption span{ display:block; color:#9FA894; font-weight:400; font-size:0.88rem; }
+  @media (max-width:720px){
+    .review-grid{ grid-template-columns:1fr; }
+  }
+
   /* ---------- Pricing ---------- */
   .pricing{ background:var(--paper-deep); }
   .price-grid{
@@ -921,6 +952,17 @@
     </div>
   </section>
 
+  <!-- REVIEWS (filled from /api/reviews, managed at admin.befluent.hu; stays hidden if empty) -->
+  <section class="reviews" id="velemenyek" hidden>
+    <div class="container">
+      <div class="section-head">
+        <h2>Akik már megszólaltak</h2>
+        <p class="lede">Néhány gondolat azoktól, akikkel már együtt dolgoztunk.</p>
+      </div>
+      <div class="review-grid" id="review-grid"></div>
+    </div>
+  </section>
+
   <!-- PRICING -->
   <section class="pricing" id="csomagok">
     <div class="container">
@@ -1119,6 +1161,48 @@
       }
     });
   });
+
+  // ---------------------------------------------------------------
+  // REVIEWS — loaded from /api/reviews (edited at admin.befluent.hu)
+  // ---------------------------------------------------------------
+  (function loadReviews(){
+    var section = document.getElementById('velemenyek');
+    var grid = document.getElementById('review-grid');
+    if(!section || !grid) return;
+
+    fetch('/api/reviews', { headers: { 'Accept': 'application/json' } })
+      .then(function(res){ return res.ok ? res.json() : { reviews: [] }; })
+      .then(function(data){
+        var reviews = data.reviews || [];
+        if(!reviews.length) return;
+        reviews.forEach(function(r){
+          // textContent only, never innerHTML, so review text can't inject markup
+          var fig = document.createElement('figure');
+          fig.className = 'review';
+          if(r.rating){
+            var stars = document.createElement('div');
+            stars.className = 'stars';
+            stars.textContent = '★'.repeat(r.rating);
+            stars.setAttribute('aria-label', r.rating + ' / 5');
+            fig.appendChild(stars);
+          }
+          var quote = document.createElement('blockquote');
+          quote.textContent = '„' + r.text + '”';
+          fig.appendChild(quote);
+          var cap = document.createElement('figcaption');
+          cap.textContent = r.name;
+          if(r.detail){
+            var detail = document.createElement('span');
+            detail.textContent = r.detail;
+            cap.appendChild(detail);
+          }
+          fig.appendChild(cap);
+          grid.appendChild(fig);
+        });
+        section.hidden = false;
+      })
+      .catch(function(){ /* no reviews shown if the API is unreachable */ });
+  })();
 
   // ---------------------------------------------------------------
   // BOOKING FORM

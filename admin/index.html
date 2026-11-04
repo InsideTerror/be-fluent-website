@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Be Fluent — Vélemények kezelése</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="https://www.befluent.hu/assets/be_fluent_favicon_square.png">
+<style>
+  :root{
+    --paper:#FAF6EE;
+    --paper-deep:#F1EADA;
+    --ink:#251F19;
+    --ink-soft:#5A5147;
+    --forest:#33422C;
+    --forest-dark:#1E2919;
+    --line: rgba(37,31,25,0.14);
+    --amber:#B9832E;
+    --amber-deep:#8E5F1E;
+    --cream-text:#F3EEE1;
+    --danger:#A13D2A;
+    --ok:#2F5D34;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size:16px;
+    line-height:1.5;
+  }
+  h1,h2{ font-family:'Fraunces', Georgia, serif; font-weight:560; color:var(--forest-dark); margin:0 0 .5em; }
+  .wordmark{ font-family:'Fraunces', serif; font-style:italic; font-weight:500; font-size:1.35rem; color:var(--forest); }
+  .wrap{ max-width:860px; margin:0 auto; padding:0 20px; }
+  header{ border-bottom:1px solid var(--line); background:var(--paper); }
+  header .wrap{ display:flex; justify-content:space-between; align-items:center; padding-top:16px; padding-bottom:16px; gap:12px; }
+  main{ padding:36px 0 80px; }
+  [hidden]{ display:none !important; }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px 18px;
+    background:var(--forest); color:var(--cream-text);
+    border:1px solid var(--forest); border-radius:2px;
+    font:inherit; font-size:.93rem; font-weight:500;
+    cursor:pointer;
+  }
+  .btn:hover{ background:var(--forest-dark); }
+  .btn[disabled]{ opacity:.6; cursor:default; }
+  .btn-amber{ background:var(--amber); border-color:var(--amber); color:#241a08; }
+  .btn-amber:hover{ background:var(--amber-deep); border-color:var(--amber-deep); color:var(--cream-text); }
+  .btn-ghost{ background:transparent; color:var(--forest); }
+  .btn-ghost:hover{ background:var(--forest); color:var(--cream-text); }
+  .btn-small{ padding:6px 11px; font-size:.85rem; }
+  .btn-danger{ background:transparent; color:var(--danger); border-color:var(--danger); }
+  .btn-danger:hover{ background:var(--danger); color:#fff; }
+
+  .card{ background:#fff; border:1px solid var(--line); border-radius:2px; padding:28px; }
+  .login{ max-width:380px; margin:40px auto; }
+
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:.85rem; font-weight:500; color:var(--ink-soft); margin-bottom:6px; }
+  .field input, .field select, .field textarea{
+    width:100%; padding:10px 12px;
+    border:1px solid var(--line); border-radius:2px;
+    font:inherit; font-size:.95rem; color:var(--ink); background:#fff;
+  }
+  .field textarea{ min-height:130px; resize:vertical; }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:2px solid var(--amber); outline-offset:1px; border-color:var(--amber); }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .hint{ font-size:.8rem; color:var(--ink-soft); margin-top:4px; }
+  @media (max-width:560px){ .field-row{ grid-template-columns:1fr; } }
+
+  .status{ font-size:.92rem; margin:12px 0 0; min-height:1.4em; }
+  .status.error{ color:var(--danger); }
+  .status.ok{ color:var(--ok); }
+
+  .toolbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .toolbar h1{ margin:0; font-size:1.7rem; }
+
+  .editor{ margin-bottom:28px; background:var(--paper-deep); border-color:transparent; }
+  .editor h2{ font-size:1.2rem; }
+  .editor-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+  .list{ list-style:none; margin:0; padding:0; display:grid; gap:14px; }
+  .item{ background:#fff; border:1px solid var(--line); border-radius:2px; padding:20px 22px; }
+  .item.is-hidden{ opacity:.6; background:var(--paper); }
+  .item-head{ display:flex; justify-content:space-between; gap:12px; align-items:baseline; flex-wrap:wrap; }
+  .item-name{ font-weight:600; color:var(--forest-dark); }
+  .item-detail{ color:var(--ink-soft); font-size:.9rem; }
+  .item-stars{ color:var(--amber); letter-spacing:2px; }
+  .item-text{ margin:10px 0 14px; white-space:pre-wrap; }
+  .item-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .badge{ font-size:.75rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; padding:2px 8px; border-radius:2px; background:var(--paper-deep); color:var(--ink-soft); }
+  .empty{ text-align:center; color:var(--ink-soft); padding:40px 20px; border:1px dashed var(--line); }
+
+  :focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="wordmark">Be Fluent · admin</span>
+    <button type="button" class="btn btn-ghost btn-small" id="logout-btn" hidden>Kijelentkezés</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- LOGIN -->
+  <section id="login-view" hidden>
+    <div class="card login">
+      <h1 style="font-size:1.5rem;">Bejelentkezés</h1>
+      <form id="login-form">
+        <div class="field">
+          <label for="login-user">Felhasználónév</label>
+          <input id="login-user" name="user" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="login-pass">Jelszó</label>
+          <input id="login-pass" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn" style="width:100%;">Belépés</button>
+        <p class="status" id="login-status" role="status"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="app-view" hidden>
+    <div class="toolbar">
+      <h1>Vélemények</h1>
+      <button type="button" class="btn btn-amber" id="new-btn">+ Új vélemény</button>
+    </div>
+
+    <div class="card editor" id="editor" hidden>
+      <h2 id="editor-title">Új vélemény</h2>
+      <form id="editor-form">
+        <div class="field-row">
+          <div class="field">
+            <label for="ed-name">Név *</label>
+            <input id="ed-name" maxlength="80" required placeholder="pl. Kovács Anna">
+          </div>
+          <div class="field">
+            <label for="ed-detail">Kiegészítés <span style="font-weight:400;">(nem kötelező)</span></label>
+            <input id="ed-detail" maxlength="120" placeholder="pl. Projektmenedzser · Intenzív csomag">
+          </div>
+        </div>
+        <div class="field">
+          <label for="ed-text">Vélemény szövege *</label>
+          <textarea id="ed-text" maxlength="2000" required></textarea>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="ed-rating">Értékelés</label>
+            <select id="ed-rating">
+              <option value="0">Nincs csillag</option>
+              <option value="5" selected>★★★★★ (5)</option>
+              <option value="4">★★★★ (4)</option>
+              <option value="3">★★★ (3)</option>
+              <option value="2">★★ (2)</option>
+              <option value="1">★ (1)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ed-visible">Láthatóság</label>
+            <select id="ed-visible">
+              <option value="1">Megjelenik a weboldalon</option>
+              <option value="0">Rejtett (piszkozat)</option>
+            </select>
+          </div>
+        </div>
+        <div class="editor-actions">
+          <button type="submit" class="btn" id="ed-save">Mentés</button>
+          <button type="button" class="btn btn-ghost" id="ed-cancel">Mégse</button>
+        </div>
+      </form>
+    </div>
+
+    <p class="status" id="app-status" role="status"></p>
+    <ul class="list" id="list"></ul>
+  </section>
+
+</main>
+
+<script>
+  var reviews = [];
+  var editingId = null;   // null = adding a new review
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  function setStatus(el, msg, kind){
+    el.textContent = msg || '';
+    el.className = 'status' + (kind ? ' ' + kind : '');
+  }
+
+  function api(method, url, body){
+    return fetch(url, {
+      method: method,
+      credentials: 'same-origin',
+      headers: body ? { 'Content-Type': 'application/json' } : {},
+      body: body ? JSON.stringify(body) : undefined
+    }).then(function(res){
+      return res.json().catch(function(){ return {}; }).then(function(data){
+        if(res.status === 401 && url.indexOf('/login') === -1){ showLogin(); }
+        if(!res.ok) throw new Error(data.error || ('Hiba (' + res.status + ')'));
+        return data;
+      });
+    });
+  }
+
+  // ---------- Views ----------
+  function showLogin(){
+    $('app-view').hidden = true;
+    $('logout-btn').hidden = true;
+    $('login-view').hidden = false;
+    $('login-user').focus();
+  }
+
+  function showApp(){
+    $('login-view').hidden = true;
+    $('app-view').hidden = false;
+    $('logout-btn').hidden = false;
+    render();
+  }
+
+  function loadAll(){
+    return api('GET', '/api/admin/reviews').then(function(data){
+      reviews = data.reviews || [];
+      showApp();
+    });
+  }
+
+  // ---------- Login / logout ----------
+  $('login-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    setStatus($('login-status'), 'Belépés...');
+    api('POST', '/api/admin/login', { user: $('login-user').value, password: $('login-pass').value })
+      .then(function(){
+        $('login-pass').value = '';
+        setStatus($('login-status'), '');
+        return loadAll();
+      })
+      .catch(function(err){ setStatus($('login-status'), err.message, 'error'); });
+  });
+
+  $('logout-btn').addEventListener('click', function(){
+    api('DELETE', '/api/admin/login').finally(showLogin);
+  });
+
+  // ---------- Saving ----------
+  function persist(next, okMsg){
+    setStatus($('app-status'), 'Mentés...');
+    return api('PUT', '/api/admin/reviews', { reviews: next }).then(function(data){
+      reviews = data.reviews;
+      render();
+      setStatus($('app-status'), okMsg + ' A weboldalon kb. 1 percen belül frissül.', 'ok');
+    }).catch(function(err){
+      setStatus($('app-status'), 'Nem sikerült menteni: ' + err.message, 'error');
+      throw err;
+    });
+  }
+
+  // ---------- Editor ----------
+  function openEditor(review){
+    editingId = review ? review.id : null;
+    $('editor-title').textContent = review ? 'Vélemény szerkesztése' : 'Új vélemény';
+    $('ed-name').value = review ? review.name : '';
+    $('ed-detail').value = review ? review.detail : '';
+    $('ed-text').value = review ? review.text : '';
+    $('ed-rating').value = review ? String(review.rating) : '5';
+    $('ed-visible').value = (!review || review.visible) ? '1' : '0';
+    $('editor').hidden = false;
+    $('editor').scrollIntoView({ behavior:'smooth', block:'start' });
+    $('ed-name').focus();
+  }
+
+  function closeEditor(){
+    editingId = null;
+    $('editor').hidden = true;
+  }
+
+  $('new-btn').addEventListener('click', function(){ openEditor(null); });
+  $('ed-cancel').addEventListener('click', closeEditor);
+
+  $('editor-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var data = {
+      name: $('ed-name').value.trim(),
+      detail: $('ed-detail').value.trim(),
+      text: $('ed-text').value.trim(),
+      rating: parseInt($('ed-rating').value, 10),
+      visible: $('ed-visible').value === '1'
+    };
+    var next;
+    if(editingId){
+      next = reviews.map(function(r){ return r.id === editingId ? Object.assign({}, r, data) : r; });
+    } else {
+      // New reviews go to the top of the list
+      next = [Object.assign({ id: crypto.randomUUID() }, data)].concat(reviews);
+    }
+    $('ed-save').disabled = true;
+    persist(next, editingId ? 'Módosítás elmentve.' : 'Új vélemény hozzáadva.')
+      .then(closeEditor)
+      .catch(function(){})
+      .finally(function(){ $('ed-save').disabled = false; });
+  });
+
+  // ---------- List ----------
+  function move(index, delta){
+    var target = index + delta;
+    if(target < 0 || target >= reviews.length) return;
+    var next = reviews.slice();
+    var tmp = next[index]; next[index] = next[target]; next[target] = tmp;
+    persist(next, 'Sorrend elmentve.').catch(function(){});
+  }
+
+  function el(tag, className, text){
+    var node = document.createElement(tag);
+    if(className) node.className = className;
+    if(text != null) node.textContent = text;
+    return node;
+  }
+
+  function button(label, className, onClick){
+    var b = el('button', 'btn btn-small ' + className, label);
+    b.type = 'button';
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function render(){
+    var list = $('list');
+    list.innerHTML = '';
+    if(!reviews.length){
+      list.appendChild(el('li', 'empty', 'Még nincs vélemény. Kattints az „+ Új vélemény” gombra!'));
+      return;
+    }
+    reviews.forEach(function(r, i){
+      var li = el('li', 'item' + (r.visible ? '' : ' is-hidden'));
+
+      var head = el('div', 'item-head');
+      var who = el('div');
+      who.appendChild(el('span', 'item-name', r.name));
+      if(r.detail){ who.appendChild(el('span', 'item-detail', ' — ' + r.detail)); }
+      head.appendChild(who);
+      var meta = el('div');
+      if(r.rating){ meta.appendChild(el('span', 'item-stars', '★'.repeat(r.rating))); }
+      if(!r.visible){ meta.appendChild(el('span', 'badge', 'Rejtett')); }
+      head.appendChild(meta);
+      li.appendChild(head);
+
+      li.appendChild(el('p', 'item-text', r.text));
+
+      var actions = el('div', 'item-actions');
+      actions.appendChild(button('Szerkesztés', 'btn-ghost', function(){ openEditor(r); }));
+      actions.appendChild(button(r.visible ? 'Elrejtés' : 'Megjelenítés', 'btn-ghost', function(){
+        var next = reviews.map(function(x){ return x.id === r.id ? Object.assign({}, x, { visible: !x.visible }) : x; });
+        persist(next, r.visible ? 'Vélemény elrejtve.' : 'Vélemény megjelenítve.').catch(function(){});
+      }));
+      var up = button('↑', 'btn-ghost', function(){ move(i, -1); });
+      up.title = 'Feljebb'; up.disabled = i === 0;
+      var down = button('↓', 'btn-ghost', function(){ move(i, 1); });
+      down.title = 'Lejjebb'; down.disabled = i === reviews.length - 1;
+      actions.appendChild(up);
+      actions.appendChild(down);
+      actions.appendChild(button('Törlés', 'btn-danger', function(){
+        if(!confirm('Biztosan törlöd ' + r.name + ' véleményét?')) return;
+        if(editingId === r.id) closeEditor();
+        persist(reviews.filter(function(x){ return x.id !== r.id; }), 'Vélemény törölve.').catch(function(){});
+      }));
+      li.appendChild(actions);
+
+      list.appendChild(li);
+    });
+  }
+
+  // On load: if the session cookie is still valid we go straight to the list
+  loadAll().catch(showLogin);
+</script>
+
+</body>
+</html>
