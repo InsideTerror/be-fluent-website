@@ -36,6 +36,48 @@ export async function saveReviews(reviews) {
   await redis(['SET', REVIEWS_KEY, JSON.stringify(reviews)]);
 }
 
+// ---------- Pending (visitor-submitted) reviews ----------
+// Kept in a separate hash so the admin's "replace whole list" save can never
+// overwrite a submission that arrived after the dashboard was loaded.
+const PENDING_KEY = 'pending_reviews';
+const MAX_PENDING = 100;
+
+export async function addPendingReview(review) {
+  const count = Number(await redis(['HLEN', PENDING_KEY]) || 0);
+  if (count >= MAX_PENDING) throw new Error('PENDING_FULL');
+  await redis(['HSET', PENDING_KEY, review.id, JSON.stringify(review)]);
+}
+
+export async function loadPendingReviews() {
+  const flat = (await redis(['HGETALL', PENDING_KEY])) || [];
+  const list = [];
+  for (let i = 1; i < flat.length; i += 2) {
+    try { list.push(JSON.parse(flat[i])); } catch (e) { /* skip corrupt entry */ }
+  }
+  return list.sort(function (a, b) { return String(b.submittedAt).localeCompare(String(a.submittedAt)); });
+}
+
+// Removes and returns a pending review (null if it no longer exists).
+// HDEL returns 1 only for the caller that actually deleted it, so two admins
+// approving at the same moment can't add the same review twice.
+export async function takePendingReview(id) {
+  const raw = await redis(['HGET', PENDING_KEY, String(id)]);
+  if (!raw) return null;
+  const removed = await redis(['HDEL', PENDING_KEY, String(id)]);
+  return removed ? JSON.parse(raw) : null;
+}
+
+// Submission throttling: max 3 reviews per IP per hour
+const MAX_SUBMISSIONS = 3;
+const SUBMIT_WINDOW_SEC = 60 * 60;
+
+export async function tooManySubmissions(req) {
+  const key = 'reviewsubmit:' + clientIp(req);
+  const count = await redis(['INCR', key]);
+  if (Number(count) === 1) await redis(['EXPIRE', key, SUBMIT_WINDOW_SEC]);
+  return Number(count) > MAX_SUBMISSIONS;
+}
+
 // Login throttling: max 5 failed attempts per IP per 15 minutes
 const MAX_FAILS = 5;
 const FAIL_WINDOW_SEC = 15 * 60;
@@ -74,6 +116,23 @@ export function sanitizeReviews(input) {
     if (!review.name || !review.text) throw new Error('Every review needs a name and text');
     return review;
   });
+}
+
+// A review sent in by a visitor through the public form
+export function sanitizeSubmission(body) {
+  const b = body || {};
+  const review = {
+    id: crypto.randomUUID(),
+    name: cleanText(b.name, 80),
+    detail: cleanText(b.detail, 120),
+    text: cleanText(b.text, 2000),
+    rating: parseInt(b.rating, 10),
+    submittedAt: new Date().toISOString(),
+  };
+  if (!review.name) throw new Error('Kérjük, add meg a neved.');
+  if (review.text.length < 20) throw new Error('A vélemény legalább 20 karakter legyen.');
+  if (!(review.rating >= 1 && review.rating <= 5)) throw new Error('Kérjük, válassz 1–5 csillagot.');
+  return review;
 }
 
 // ---------- Auth (signed session cookie) ----------

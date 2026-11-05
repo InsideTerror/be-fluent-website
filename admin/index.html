@@ -96,6 +96,10 @@
   .item-text{ margin:10px 0 14px; white-space:pre-wrap; }
   .item-actions{ display:flex; gap:8px; flex-wrap:wrap; }
   .badge{ font-size:.75rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; padding:2px 8px; border-radius:2px; background:var(--paper-deep); color:var(--ink-soft); }
+  .pending{ margin-bottom:36px; }
+  .pending h2{ font-size:1.25rem; }
+  .pending .item{ border-left:3px solid var(--amber); }
+  .item-date{ color:var(--ink-soft); font-size:.8rem; margin-left:8px; }
   .empty{ text-align:center; color:var(--ink-soft); padding:40px 20px; border:1px dashed var(--line); }
 
   :focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
@@ -137,6 +141,12 @@
       <h1>Vélemények</h1>
       <button type="button" class="btn btn-amber" id="new-btn">+ Új vélemény</button>
     </div>
+
+    <section class="pending" id="pending" hidden>
+      <h2 id="pending-title">Jóváhagyásra vár</h2>
+      <p class="hint" style="margin-top:-4px;">A látogatók által beküldött vélemények csak jóváhagyás után jelennek meg a weboldalon.</p>
+      <ul class="list" id="pending-list"></ul>
+    </section>
 
     <div class="card editor" id="editor" hidden>
       <h2 id="editor-title">Új vélemény</h2>
@@ -190,6 +200,7 @@
 
 <script>
   var reviews = [];
+  var pending = [];
   var editingId = null;   // null = adding a new review
 
   var $ = function(id){ return document.getElementById(id); };
@@ -230,8 +241,12 @@
   }
 
   function loadAll(){
-    return api('GET', '/api/admin/reviews').then(function(data){
-      reviews = data.reviews || [];
+    return Promise.all([
+      api('GET', '/api/admin/reviews'),
+      api('GET', '/api/admin/pending')
+    ]).then(function(results){
+      reviews = results[0].reviews || [];
+      pending = results[1].pending || [];
       showApp();
     });
   }
@@ -334,7 +349,57 @@
     return b;
   }
 
+  // ---------- Pending (visitor-submitted) ----------
+  function decide(r, action){
+    if(action === 'reject' && !confirm('Biztosan elutasítod ' + r.name + ' véleményét? Ez végleg törli.')) return;
+    setStatus($('app-status'), action === 'approve' ? 'Jóváhagyás...' : 'Elutasítás...');
+    api('POST', '/api/admin/pending', { id: r.id, action: action }).then(function(data){
+      reviews = data.reviews || reviews;
+      pending = data.pending || [];
+      render();
+      setStatus($('app-status'), action === 'approve'
+        ? 'Vélemény jóváhagyva, a lista elejére került. A weboldalon kb. 1 percen belül megjelenik.'
+        : 'Vélemény elutasítva.', 'ok');
+    }).catch(function(err){
+      setStatus($('app-status'), err.message, 'error');
+      // Someone else may have handled it — refresh both lists
+      loadAll().catch(function(){});
+    });
+  }
+
+  function formatDate(iso){
+    var d = new Date(iso);
+    return isNaN(d) ? '' : d.toLocaleString('hu-HU', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+
+  function renderPending(){
+    var list = $('pending-list');
+    list.innerHTML = '';
+    $('pending').hidden = !pending.length;
+    $('pending-title').textContent = 'Jóváhagyásra vár (' + pending.length + ')';
+    pending.forEach(function(r){
+      var li = el('li', 'item');
+      var head = el('div', 'item-head');
+      var who = el('div');
+      who.appendChild(el('span', 'item-name', r.name));
+      if(r.detail){ who.appendChild(el('span', 'item-detail', ' — ' + r.detail)); }
+      who.appendChild(el('span', 'item-date', formatDate(r.submittedAt)));
+      head.appendChild(who);
+      var meta = el('div');
+      if(r.rating){ meta.appendChild(el('span', 'item-stars', '★'.repeat(r.rating))); }
+      head.appendChild(meta);
+      li.appendChild(head);
+      li.appendChild(el('p', 'item-text', r.text));
+      var actions = el('div', 'item-actions');
+      actions.appendChild(button('Jóváhagyás', '', function(){ decide(r, 'approve'); }));
+      actions.appendChild(button('Elutasítás', 'btn-danger', function(){ decide(r, 'reject'); }));
+      li.appendChild(actions);
+      list.appendChild(li);
+    });
+  }
+
   function render(){
+    renderPending();
     var list = $('list');
     list.innerHTML = '';
     if(!reviews.length){
