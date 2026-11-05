@@ -461,6 +461,42 @@
   @media (max-width:720px){
     .review-grid{ grid-template-columns:1fr; }
   }
+  .review-cta{ margin-top:48px; }
+
+  /* Review submission dialog */
+  .review-dialog{
+    width:min(560px, calc(100vw - 32px));
+    max-height:calc(100vh - 32px);
+    padding:34px 32px 28px;
+    border:none;
+    border-radius:var(--radius-soft);
+    background:var(--paper);
+    color:var(--ink);
+    box-shadow:0 24px 60px rgba(0,0,0,0.35);
+  }
+  .review-dialog::backdrop{ background:rgba(20,26,17,0.6); }
+  .review-dialog h3{ font-size:1.5rem; color:var(--forest-dark); margin-bottom:6px; }
+  .review-dialog .intro{ color:var(--ink-soft); font-size:0.94rem; margin-bottom:22px; }
+  .review-dialog .btn{ width:100%; justify-content:center; margin-top:6px; }
+  .review-dialog .btn[disabled]{ opacity:0.6; cursor:default; }
+  .dialog-close{
+    position:absolute; top:10px; right:12px;
+    background:none; border:none; cursor:pointer;
+    font-size:1.6rem; line-height:1; color:var(--ink-soft); padding:6px;
+  }
+  .dialog-close:hover{ color:var(--ink); }
+  @media (max-width:520px){ .review-dialog{ padding:30px 20px 22px; } }
+
+  /* Star picker: radios in reverse order so "~" can highlight lower stars */
+  .star-picker{ border:none; margin:0 0 18px; padding:0; }
+  .star-picker legend{ font-size:0.85rem; font-weight:500; color:var(--ink-soft); margin-bottom:4px; padding:0; }
+  .star-picker .stars-row{ display:inline-flex; flex-direction:row-reverse; }
+  .star-picker input{ position:absolute; opacity:0; width:1px; height:1px; }
+  .star-picker label{ font-size:1.9rem; line-height:1; padding:0 3px; cursor:pointer; color:#CFC5B2; transition:color .1s ease; }
+  .star-picker input:checked ~ label,
+  .star-picker label:hover,
+  .star-picker label:hover ~ label{ color:var(--amber); }
+  .star-picker input:focus-visible + label{ outline:2px solid var(--amber); outline-offset:2px; }
 
   /* ---------- Pricing ---------- */
   .pricing{ background:var(--paper-deep); }
@@ -952,15 +988,61 @@
     </div>
   </section>
 
-  <!-- REVIEWS (filled from /api/reviews, managed at admin.befluent.hu; stays hidden if empty) -->
-  <section class="reviews" id="velemenyek" hidden>
+  <!-- REVIEWS (filled from /api/reviews; visitors submit via the dialog below, admins approve at admin.befluent.hu) -->
+  <section class="reviews on-dark" id="velemenyek">
     <div class="container">
       <div class="section-head">
         <h2>Akik már megszólaltak</h2>
-        <p class="lede">Néhány gondolat azoktól, akikkel már együtt dolgoztunk.</p>
+        <p class="lede" id="review-lede">Dolgoztunk már együtt? Legyél te az első, aki megosztja a tapasztalatait!</p>
       </div>
-      <div class="review-grid" id="review-grid"></div>
+      <div class="review-grid" id="review-grid" hidden></div>
+      <div class="review-cta">
+        <button type="button" class="btn btn-on-dark" id="review-open">Írd meg a véleményed</button>
+      </div>
     </div>
+
+    <dialog class="review-dialog" id="review-dialog" aria-labelledby="review-dialog-title">
+      <button type="button" class="dialog-close" id="review-close" aria-label="Bezárás">×</button>
+      <h3 id="review-dialog-title">Írd meg a véleményed</h3>
+      <p class="intro">Köszönöm, hogy megosztod a tapasztalataidat! A véleményed jóváhagyás után jelenik meg az oldalon.</p>
+      <form id="review-form">
+        <!-- honeypot spam trap, left empty by real visitors -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="rv-website">Website</label>
+          <input type="text" id="rv-website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="rv-name">Neved</label>
+            <input type="text" id="rv-name" name="name" required maxlength="80" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="rv-detail">Kiegészítés <span style="font-weight:400;">(nem kötelező)</span></label>
+            <input type="text" id="rv-detail" name="detail" maxlength="120" placeholder="pl. Projektmenedzser · Intenzív csomag">
+          </div>
+        </div>
+
+        <fieldset class="star-picker">
+          <legend>Értékelés</legend>
+          <div class="stars-row">
+            <input type="radio" id="rv-star5" name="rating" value="5"><label for="rv-star5" title="5 csillag">★</label>
+            <input type="radio" id="rv-star4" name="rating" value="4"><label for="rv-star4" title="4 csillag">★</label>
+            <input type="radio" id="rv-star3" name="rating" value="3"><label for="rv-star3" title="3 csillag">★</label>
+            <input type="radio" id="rv-star2" name="rating" value="2"><label for="rv-star2" title="2 csillag">★</label>
+            <input type="radio" id="rv-star1" name="rating" value="1"><label for="rv-star1" title="1 csillag">★</label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="rv-text">Véleményed</label>
+          <textarea id="rv-text" name="text" required minlength="20" maxlength="2000" rows="5" placeholder="Milyen volt együtt dolgozni? Miben fejlődtél?"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-amber" id="rv-submit">Vélemény elküldése</button>
+        <p class="form-status" id="rv-status" role="status"></p>
+      </form>
+    </dialog>
   </section>
 
   <!-- PRICING -->
@@ -1166,9 +1248,8 @@
   // REVIEWS — loaded from /api/reviews (edited at admin.befluent.hu)
   // ---------------------------------------------------------------
   (function loadReviews(){
-    var section = document.getElementById('velemenyek');
     var grid = document.getElementById('review-grid');
-    if(!section || !grid) return;
+    if(!grid) return;
 
     fetch('/api/reviews', { headers: { 'Accept': 'application/json' } })
       .then(function(res){ return res.ok ? res.json() : { reviews: [] }; })
@@ -1199,7 +1280,8 @@
           fig.appendChild(cap);
           grid.appendChild(fig);
         });
-        section.hidden = false;
+        grid.hidden = false;
+        document.getElementById('review-lede').textContent = 'Néhány gondolat azoktól, akikkel már együtt dolgoztunk.';
       })
       .catch(function(){ /* no reviews shown if the API is unreachable */ });
   })();
@@ -1307,6 +1389,92 @@
       });
     });
   }
+
+  // ---------------------------------------------------------------
+  // REVIEW SUBMISSION — saved via /api/reviews as "pending";
+  // shown on the site only after approval at admin.befluent.hu
+  // ---------------------------------------------------------------
+  (function setupReviewForm(){
+    var dialog = document.getElementById('review-dialog');
+    var openBtn = document.getElementById('review-open');
+    var rForm = document.getElementById('review-form');
+    var rStatus = document.getElementById('rv-status');
+    var rSubmit = document.getElementById('rv-submit');
+    if(!dialog || !openBtn || !rForm) return;
+
+    // Very old browsers without <dialog>: hide the button rather than break
+    if(typeof dialog.showModal !== 'function'){ openBtn.hidden = true; return; }
+
+    openBtn.addEventListener('click', function(){
+      rStatus.className = 'form-status';
+      rStatus.textContent = '';
+      dialog.showModal();
+    });
+    document.getElementById('review-close').addEventListener('click', function(){ dialog.close(); });
+    // Click on the backdrop closes the dialog
+    dialog.addEventListener('click', function(e){ if(e.target === dialog) dialog.close(); });
+
+    function showStatus(msg, kind){
+      rStatus.textContent = msg;
+      rStatus.className = 'form-status is-visible' + (kind ? ' ' + kind : '');
+    }
+
+    function notifyAdmin(review){
+      // Best-effort e-mail heads-up via the same Web3Forms key as the booking form
+      if(WEB3FORMS_ACCESS_KEY.indexOf('PASTE-YOUR') === 0) return;
+      var fd = new FormData();
+      fd.append('access_key', WEB3FORMS_ACCESS_KEY);
+      fd.append('subject', 'Új vélemény vár jóváhagyásra — Be Fluent');
+      fd.append('from_name', 'Be Fluent — weboldal');
+      fd.append('Név', review.name);
+      fd.append('Értékelés', '★'.repeat(review.rating));
+      fd.append('Vélemény', review.text);
+      fd.append('Jóváhagyás', 'https://admin.befluent.hu');
+      fetch('https://api.web3forms.com/submit', { method:'POST', headers:{ 'Accept':'application/json' }, body: fd })
+        .catch(function(){});
+    }
+
+    rForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      var rating = rForm.querySelector('input[name="rating"]:checked');
+      var review = {
+        website: document.getElementById('rv-website').value,
+        name: document.getElementById('rv-name').value.trim(),
+        detail: document.getElementById('rv-detail').value.trim(),
+        text: document.getElementById('rv-text').value.trim(),
+        rating: rating ? parseInt(rating.value, 10) : 0
+      };
+      if(review.website) return; // honeypot
+      if(!review.rating){ showStatus('Kérjük, válassz 1–5 csillagot.', 'error'); return; }
+
+      rSubmit.disabled = true;
+      rSubmit.textContent = 'Küldés...';
+      showStatus('');
+
+      fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(review)
+      })
+      .then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(data){
+          if(!res.ok) throw new Error(data.error || 'Hiba történt a küldés közben.');
+        });
+      })
+      .then(function(){
+        notifyAdmin(review);
+        rForm.reset();
+        showStatus('Köszönjük! A véleményed jóváhagyás után jelenik meg az oldalon.', 'success');
+      })
+      .catch(function(err){
+        showStatus(err.message || 'Hiba történt a küldés közben. Kérjük, próbáld újra később.', 'error');
+      })
+      .finally(function(){
+        rSubmit.disabled = false;
+        rSubmit.textContent = 'Vélemény elküldése';
+      });
+    });
+  })();
 
   // re-apply date min/max after a successful reset (min day may have shifted)
   function setupDateWindowAgain(){
